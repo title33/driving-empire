@@ -1,15 +1,15 @@
-local Fluent = loadstring(game:HttpGet("https://raw.githubusercontent.com/title33/Modified.lua/main/README.md"))()
-local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/title33/Theme.lua/main/README.md"))()
-local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/title33/SaveManager.lua/main/README.md"))()
+local Fluent = loadstring(game:HttpGet("https://raw.githubusercontent.com/Lynix001/LynIx/main/UI/Fluent/Modified.lua"))()
+local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/Lynix001/LynIx/main/UI/SaveManager.lua"))()
+local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/Lynix001/LynIx/main/UI/Theme.lua"))()
 
 local Window = Fluent:CreateWindow({
     Title = "Xylo Hub",
     SubTitle = "by Sky",
     TabWidth = 160,
     Size = UDim2.fromOffset(580, 460),
-    Acrylic = false,
-    Theme = "Reach Hub",
-    MinimizeKey = Enum.KeyCode.LeftControl,
+    Acrylic = true, -- The blur may be detectable, setting this to false disables blur entirely
+    Theme = "LynIx Hub",
+    MinimizeKey = Enum.KeyCode.LeftControl -- Used when theres no MinimizeKeybind
 })
 
 --Fluent provides Lucide Icons https://lucide.dev/icons/ for the tabs, icons are optional
