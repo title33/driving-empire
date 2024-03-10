@@ -1,7 +1,9 @@
-local Fluent = loadstring(game:HttpGet("https://raw.githubusercontent.com/title33/zdq/main/Fluent.lua"))()
-local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/title33/SaveManager/main/SaveManager.lua"))()
+-- Load libraries
+local Fluent = loadstring(game:HttpGet("https://raw.githubusercontent.com/title33/zdq/main/README.md"))()
+local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/title33/SaveManager/main/README.md"))()
 local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
 
+-- Create a Fluent window
 local Window = Fluent:CreateWindow({
     Title = "Xylo Hub",
     SubTitle = "by Sky",
@@ -12,6 +14,7 @@ local Window = Fluent:CreateWindow({
     MinimizeKey = Enum.KeyCode.LeftControl
 })
 
+-- Create tabs and options
 local Tabs = {
     General = Window:AddTab({ Title = "General", Icon = "http://www.roblox.com/asset/?id=11254763826" }),
     Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
@@ -19,21 +22,38 @@ local Tabs = {
 
 local Options = Fluent.Options
 
-local LocalPlayer = game:GetService("Players").LocalPlayer
-local Camera = workspace.CurrentCamera
-local VirtualUser = game:GetService("VirtualUser")
-local MarketplaceService = game:GetService("MarketplaceService")
-
-function GetCurrentVehicle()
-    return LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") and LocalPlayer.Character.Humanoid.SeatPart and LocalPlayer.Character.Humanoid.SeatPart.Parent
-end
-
 function TP(cframe)
     GetCurrentVehicle():SetPrimaryPartCFrame(cframe)
 end
 
+--Vars
+LocalPlayer = game:GetService("Players").LocalPlayer
+Camera = workspace.CurrentCamera
+VirtualUser = game:GetService("VirtualUser")
+MarketplaceService = game:GetService("MarketplaceService")
+
+--Get Current Vehicle
+function GetCurrentVehicle()
+    return LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") and LocalPlayer.Character.Humanoid.SeatPart and LocalPlayer.Character.Humanoid.SeatPart.Parent
+end
+
+--Notification Handler
+function SendNotification(Title, Message, Duration)
+    game.StarterGui:SetCore("SendNotification", {
+        Title = Title;
+        Text = Message;
+        Duration = Duration;
+    })
+end
+
+--Regular TP
+function TP(cframe)
+    GetCurrentVehicle():SetPrimaryPartCFrame(cframe)
+end
+
+--Velocity TP
 function VelocityTP(cframe)
-    TeleportSpeed = math.random(600, 600)
+    TeleportSpeed = math.random(200, 600)
     Car = GetCurrentVehicle()
     local BodyGyro = Instance.new("BodyGyro", Car.PrimaryPart)
     BodyGyro.P = 5000
@@ -49,10 +69,10 @@ function VelocityTP(cframe)
     BodyGyro:Destroy()
 end
 
-local StartPosition = CFrame.new(Vector3.new(-34499.33203125, 34.895652770996094, -32842.09765625))
-local EndPosition = CFrame.new(Vector3.new(-27089.5390625, 34.98033905029297, -18172.068359375))
-
-local AutoFarmFunc = coroutine.create(function()
+--Auto Farm
+StartPosition = CFrame.new(Vector3.new(811.013184, 27.3421249, 2203.55542), Vector3.new(-187, 25.7, 1982))
+EndPosition = CFrame.new(Vector3.new(-76.4760208, 27.7194824, 1993.84229), Vector3.new(-187, 25.7, 1982))
+AutoFarmFunc = coroutine.create(function()
     while wait() do
         if not AutoFarm then
             AutoFarmRunning = false
@@ -62,55 +82,68 @@ local AutoFarmFunc = coroutine.create(function()
         pcall(function()
             if not GetCurrentVehicle() and tick() - (LastNotif or 0) > 5 then
                 LastNotif = tick()
+                SendNotification("Aloha Scripts", "Please Enter A Vehicle!")
             else
-                TP(StartPosition)
-                VelocityTP(EndPosition)
-                TP(EndPosition)
-                VelocityTP(StartPosition)
+                TP(StartPosition + (TouchTheRoad and Vector3.new() or Vector3.new(0, 1, 0)))
+                VelocityTP(EndPosition + (TouchTheRoad and Vector3.new() or Vector3.new(0, 1, 0)))
+                TP(EndPosition + (TouchTheRoad and Vector3.new() or Vector3.new(0, 1, 0)))
+                VelocityTP(StartPosition + (TouchTheRoad and Vector3.new() or Vector3.new(0, 1, 0)))
             end
         end)
     end
 end)
-
-local AntiAFK = true
+-- Anti AFK
+AntiAFK = true
 LocalPlayer.Idled:Connect(function()
     VirtualUser:CaptureController()
     VirtualUser:ClickButton2(Vector2.new(), Camera.CFrame)
 end)
 
-local Input = Tabs.General:AddInput("Input", {
-    Title = "Input",
-    Default = "Default",
-    Placeholder = "Placeholder",
-    Numeric = false,
-    Finished = false,
-    Callback = function(Value)
-        print("Input changed:", Value)
-    end
-})
+-- Add UI elements
+local ToggleAutoFarm = Tabs.General:AddToggle("Toggle Auto Farm", {Title = "Auto Farm", Default = false })
 
-Input:OnChanged(function()
-    print("Input updated:", Input.Value)
-end)
-
-local Toggle = Tabs.General:AddToggle("AutoFarmToggle", { Title = "Auto Farm", Default = false })
-
-Toggle:OnChanged(function(value)
+ToggleAutoFarm:OnChanged(function(value)
     AutoFarm = value
     if value and not AutoFarmRunning then
         coroutine.resume(AutoFarmFunc)
     end
 end)
 
--- Addons
+local InputVelocity = Tabs.General:AddInput("Input Velocity", {
+    Title = "Velocity",
+    Default = "600",
+    Placeholder = "Enter Velocity",
+    Numeric = true,
+    Finished = false,
+    Callback = function(Value)
+        print("Velocity changed:", Value)
+        SetVelocity(Value)
+    end
+})
+
+InputVelocity:OnChanged(function()
+    print("Velocity updated:", InputVelocity.Value)
+end)
+
+
+
+
+-- Load libraries and set up managers
 SaveManager:SetLibrary(Fluent)
 InterfaceManager:SetLibrary(Fluent)
 SaveManager:IgnoreThemeSettings()
 SaveManager:SetIgnoreIndexes({})
+
+-- Set folders for SaveManager
 InterfaceManager:SetFolder("FluentScriptHub")
 SaveManager:SetFolder("FluentScriptHub/specific-game")
+
+-- Build UI sections
 InterfaceManager:BuildInterfaceSection(Tabs.Settings)
 SaveManager:BuildConfigSection(Tabs.Settings)
 
+-- Select the first tab
 Window:SelectTab(1)
+
+-- Load autoload config
 SaveManager:LoadAutoloadConfig()
